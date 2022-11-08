@@ -1,0 +1,3 @@
+logging:
+    verbose: True
+    filename: mylogfile.log
