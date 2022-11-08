@@ -18,7 +18,7 @@ else:
 
 logging.basicConfig(
          format = '%(asctime)s %(levelname)-8s %(message)s',
-         level = logging.INFO, # root logger
+         level = logging.ERROR, # root logger
          datefmt = '%Y-%m-%d %H:%M:%S',
          handlers = handlers)
 
