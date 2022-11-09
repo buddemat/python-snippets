@@ -1,12 +1,17 @@
 import logging
 import yaml
+from pathlib import Path
+
 
 # Load options 
 options = yaml.safe_load(open('./config.yml'))
 
 # Initialize logging
+log_file_name = options.get('logging').get('filename')
+if not log_file_name:
+    log_file_name = f'{Path(__file__).stem}.log'
 logger = logging.getLogger('mylogger')
-log_file_handler = logging.FileHandler(filename = options.get('logging').get('filename'), 
+log_file_handler = logging.FileHandler(filename = log_file_name, 
                                        encoding = 'utf-8', 
                                        mode = 'w')
 
