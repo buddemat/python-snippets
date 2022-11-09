@@ -15,7 +15,7 @@ log_file_handler = logging.FileHandler(filename = log_file_name,
                                        encoding = 'utf-8', 
                                        mode = 'w')
 
-if options.get('logging').get('verbose'):
+if options.get('logging').get('stdout'):
     stdout_handler = logging.StreamHandler(sys.stdout)
     handlers = [log_file_handler, stdout_handler]
 else:
