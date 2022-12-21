@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 BASE_URL = 'https://www.namenforschung.net/dfd/woerterbuch/liste/?tx_dfd_names[offset]='
 MAX_PAGES = 1178
 
+print(f'Scraping "{BASE_URL}" ...', end='', flush=True)
 with open('lastnames.csv', 'w', encoding='utf-8') as file_handle:
     writer = csv.writer(file_handle)
     writer.writerow(['lastname', 'rank', 'occurrence'])
@@ -29,4 +30,5 @@ with open('lastnames.csv', 'w', encoding='utf-8') as file_handle:
             for item in cells:
                 cols.append(item.text.strip())
             writer.writerow(cols)
-            print(cols)
+        print('.', end='', flush=True)
+print("\nCompleted.")
