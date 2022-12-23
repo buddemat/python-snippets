@@ -7,9 +7,12 @@ from pathlib import Path
 options = yaml.safe_load(open('./config.yml'))
 
 # Initialize logging
-log_file_name = options.get('logging').get('filename')
+log_file_name = options.get('logging').get('filename', None)
 if not log_file_name:
     log_file_name = f'{Path(__file__).stem}.log'
+
+log_lvl = logging.getLevelName(options.get('logging').get('lvl', 'INFO'))
+
 logger = logging.getLogger('mylogger')
 log_file_handler = logging.FileHandler(filename = log_file_name, 
                                        encoding = 'utf-8', 
@@ -23,8 +26,8 @@ else:
 
 logging.basicConfig(
          format = '%(asctime)s %(levelname)-8s %(message)s',
-         level = logging.ERROR, # root logger
+         level = logging.ERROR, # log level for root logger
          datefmt = '%Y-%m-%d %H:%M:%S',
          handlers = handlers)
 
-logger.setLevel(logging.INFO) # mylogger
+logger.setLevel(log_lvl) # log level for mylogger

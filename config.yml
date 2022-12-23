@@ -1,3 +1,4 @@
 logging:
     stdout: True
     filename: mylogfile.log
+    lvl: INFO # must be uppercase
