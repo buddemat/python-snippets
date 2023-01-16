@@ -13,7 +13,7 @@ if not log_file_name:
 
 log_lvl = logging.getLevelName(options.get('logging').get('lvl', 'INFO'))
 
-logger = logging.getLogger('mylogger')
+logger = logging.getLogger('mylogger') # for root logger: .getlogger('')
 log_file_handler = logging.FileHandler(filename = log_file_name, 
                                        encoding = 'utf-8', 
                                        mode = 'w')
