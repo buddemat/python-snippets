@@ -1,14 +1,15 @@
 from atlassian import Confluence
 from atlassian.errors import ApiPermissionError
+from getpass import getpass
 
-confluence_server = ''
-confluence_user = ''
-confluence_password = ''
+confluence_server = input('Enter confluence server url (without protocol): ')
+confluence_user = input('Please enter confluence user name: ')
+confluence_password = getpass('Please enter Confluence password for user %s: ' % confluence_user)
 
 
 def confluence_connect(confluence_server, confluence_user, confluence_password):
     try: 
-        c = Confluence(url=confluence_server, username=confluence_user, password=confluence_password)
+        c = Confluence(url=f'https://{confluence_server}', username=confluence_user, password=confluence_password)
         # atlassian API does not raise an exception on failed login, so manual workaround to do this     
         try:
             c.get_user_details_by_username(confluence_user, expand=None)
