@@ -1,33 +1,53 @@
+#!/usr/bin/env python3
+"""Atlassian Confluence Update
+
+Script to regex replace stuff on confluence pages.
+"""
+import logging
+import sys
+from getpass import getpass
 from atlassian import Confluence
 from atlassian.errors import ApiPermissionError
-from getpass import getpass
-import logging
 
 log_level = logging.INFO
 
 confluence_server = input('Enter confluence server url (without protocol): ')
 confluence_user = input('Please enter confluence user name: ')
-confluence_password = getpass('Please enter Confluence password for user %s: ' % confluence_user)
+confluence_password = getpass(f'Please enter Confluence password for user {confluence_user}: ')
 
+def confluence_connect(conf_server, conf_user, conf_password):
+    """Connect to confluence server and check success
 
-def confluence_connect(confluence_server, confluence_user, confluence_password):
-    try: 
-        logging.info('Connecting to Confluence (%s)...' % confluence_server)
-        c = Confluence(url=f'https://{confluence_server}', username=confluence_user, password=confluence_password)
-        # atlassian API does not raise an exception on failed login, so manual workaround to do this     
+    :param conf_server server url (without https)
+    :param conf_user user name for confluence
+    :param conf_password password for confluence user
+    :return: confluence connection object
+    """
+    try:
+        logging.info(f'Connecting to Confluence ({confluence_server})...')
+        conn = Confluence(url=f'https://{confluence_server}', username=confluence_user, password=confluence_password)
+        # atlassian API does not raise an exception on failed login, so manual workaround to do this
         try:
-            c.get_user_details_by_username(confluence_user, expand=None)
+            conn.get_user_details_by_username(confluence_user, expand=None)
         except ApiPermissionError as err:
             raise PermissionError('Permission error: Login failed.') from err
-        return c
+        return conn
 
-    except Exception as e:
+    except Exception as err:
         logging.error('  ... failed to connect to Confluence.')
-        logging.error(e)
+        logging.error(err)
         sys.exit()
 
-def confluence_site_search(conf_connection, query, q_type=None, q_space=None, limit=None):
+def confluence_site_search(conf_connection, query_str, q_type=None, q_space=None, limit=None):
+    """Search confluence using query_string.
+
+    :param conf_connection confluence connection object
+    :param query_str query string
+    :return: list of confluence page IDs that are hits for the query string
+    :rtype:
+    """
     pass
+
 
 # connect to server
 conf = confluence_connect(confluence_server, confluence_user, confluence_password)
