@@ -6,6 +6,7 @@ Script to regex replace stuff on confluence pages.
 import logging
 import sys
 from getpass import getpass
+import regex
 from atlassian import Confluence
 from atlassian.errors import ApiPermissionError
 
@@ -59,10 +60,34 @@ def confluence_site_search(conf_connection, query_str, q_type=None, q_space=None
         logging.info(' ... %s records found.', len(id_list))
         return id_list
 
-    except Exception as e:
+    except Exception as err:
         logging.error('  ... failed to complete query.')
         return None
 
+def update_confluence_pages(conf_connection, page_id_list, search_pattern, replace_pattern, commit_msg=None):
+    """Regex replace pattern in all pages in page_ids_list.
+
+    :param conf_connection confluence connection object
+    :param page_id_list list of confluence page ids
+    :param search_pattern regex search pattern string
+    :param replace_pattern regex replacement string
+    :return:
+    :rtype:
+    """
+    rex = regex.compile(search_pattern)
+    logging.info('Search pattern is %s', search_pattern)
+    logging.info('Replacement pattern is %s', replace_pattern)
+
+    for pid in page_id_list:
+        logging.info('Editing page %s ...', pid)
+        page = conf_connection.get_page_by_id(pid, expand='body.storage,version')
+        page_title = page['title']
+        logging.info('  ... page title: %s', page_title)
+        page_body = page['body']['storage']['value']
+        page_body, num = rex.subn(replace_pattern, page_body)
+        logging.info('  ... number of replacements: %s', num)
+
+        conf_connection.update_page(pid, page_title, page_body, version_comment=commit_msg)
 
 def main():
     """Main function.
@@ -81,10 +106,15 @@ def main():
     query_string = 'TESTSTRINGFORTESTING*'
     search_pattern = 'TESTSTRINGFORTESTING'
     replace_pattern = 'TESTSTRINGFORTESTINGREPLACED'
+    commit_message = None
+
 
     # find pages
     page_ids = confluence_site_search(conf, query_string, page_type, page_space, find_limit)
+    print(page_ids)
 
+    # update pages
+    update_confluence_pages(conf, page_ids, search_pattern, replace_pattern, commit_message)
 
 if __name__ == "__main__":
     main()
