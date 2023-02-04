@@ -104,14 +104,17 @@ def main():
 
     # confluence search allows wildcards * (multiple chars) and ? (single char) EXCEPT at the very beginning!
     query_string = 'TESTSTRINGFORTESTING*'
-    search_pattern = 'TESTSTRINGFORTESTING'
-    replace_pattern = 'TESTSTRINGFORTESTINGREPLACED'
-    commit_message = None
 
+    # regex pattern
+    search_pattern = 'TESTSTRINGFORTESTING'
+    replace_pattern = 'TESTSTRINGFORTESTINGNEWLYREPLACED'
+
+    # set confluence 
+    commit_message = f'{__file__}: Bulk regex replacement of pattern "{search_pattern}" with "{replace_pattern}"'
 
     # find pages
     page_ids = confluence_site_search(conf, query_string, page_type, page_space, find_limit)
-    print(page_ids)
+    logging.info(page_ids)
 
     # update pages
     update_confluence_pages(conf, page_ids, search_pattern, replace_pattern, commit_message)
