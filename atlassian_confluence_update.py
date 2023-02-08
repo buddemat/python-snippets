@@ -11,6 +11,29 @@ from atlassian import Confluence
 from atlassian.errors import ApiPermissionError
 
 log_level = logging.INFO
+log_file_name = f'{__file__}.log'
+log_stdout = True
+
+logger = logging.getLogger('conflogger')
+
+log_file_handler = logging.FileHandler(filename = log_file_name, 
+                                       encoding = 'utf-8', 
+                                       mode = 'w')
+
+if log_stdout:
+    stdout_handler = logging.StreamHandler(sys.stdout)
+    handlers = [log_file_handler, stdout_handler]
+else:
+    handlers = [log_file_handler]
+
+logging.basicConfig(
+         format = '%(asctime)s %(levelname)-8s %(message)s',
+         level = logging.ERROR, # log level for root logger
+         datefmt = '%Y-%m-%d %H:%M:%S',
+         handlers = handlers)
+
+logger.setLevel(log_level) # log level for conflogger
+
 
 confluence_server = input('Enter confluence server url (without protocol): ')
 confluence_user = input('Please enter confluence user name: ')
@@ -26,7 +49,7 @@ def confluence_connect(conf_server, conf_user, conf_password):
     :return: confluence connection object
     """
     try:
-        logging.info('Connecting to Confluence (%s)...', conf_server)
+        logger.info('Connecting to Confluence (%s)...', conf_server)
         conn = Confluence(url=f'https://{confluence_server}',
                           username=conf_user,
                           password=conf_password
@@ -39,8 +62,8 @@ def confluence_connect(conf_server, conf_user, conf_password):
         return conn
 
     except Exception as err:
-        logging.error('  ... failed to connect to Confluence.')
-        logging.error(err)
+        logger.error('  ... failed to connect to Confluence.')
+        logger.error(err)
         sys.exit()
 
 def confluence_site_search(conf_conn, query_str, q_type=None, q_space=None, limit=1000):
@@ -60,15 +83,15 @@ def confluence_site_search(conf_conn, query_str, q_type=None, q_space=None, limi
             cql = cql + ' and type="' + q_type + '"'
         if q_space:
             cql = cql + ' and space="' + q_space + '"'
-        logging.info('Sending CQL search query \'%s\'...', cql)
+        logger.info('Sending CQL search query \'%s\'...', cql)
         search_results = conf_conn.cql(cql,limit=limit)
         id_list = [result['content']['id'] for result in search_results['results']]
-        logging.info(' ... %s records found.', len(id_list))
+        logger.info(' ... %s records found.', len(id_list))
         return id_list
 
     except Exception as err:
-        logging.error('  ... failed to complete query.')
-        logging.error(err)
+        logger.error('  ... failed to complete query.')
+        logger.error(err)
         return None
 
 def update_confluence_pages(conf_conn, page_id_list, srch_pattern, rplce_pattern, commit_msg=None):
@@ -82,17 +105,17 @@ def update_confluence_pages(conf_conn, page_id_list, srch_pattern, rplce_pattern
     :rtype:
     """
     rex = regex.compile(srch_pattern)
-    logging.info('Search pattern is %s', srch_pattern)
-    logging.info('Replacement pattern is %s', rplce_pattern)
+    logger.info('Search pattern is %s', srch_pattern)
+    logger.info('Replacement pattern is %s', rplce_pattern)
 
     for pid in page_id_list:
-        logging.info('Editing page %s ...', pid)
+        logger.info('Editing page %s ...', pid)
         page = conf_conn.get_page_by_id(pid, expand='body.storage,version')
         page_title = page['title']
-        logging.info('  ... page title: %s', page_title)
+        logger.info('  ... page title: %s', page_title)
         page_body = page['body']['storage']['value']
         page_body, num = rex.subn(rplce_pattern, page_body)
-        logging.info('  ... number of replacements: %s', num)
+        logger.info('  ... number of replacements: %s', num)
 
         conf_conn.update_page(pid, page_title, page_body, version_comment=commit_msg)
 
@@ -113,18 +136,21 @@ def main():
     search_pattern = 'TESTSTRINGFORTESTING'
     replace_pattern = 'TESTSTRINGFORTESTINGNEWLYREPLACED'
 
-    # set confluence
+    # set confluence commit message for history
     commit_message = f'{__file__}: Bulk regex replacement of pattern "{search_pattern}" with "{replace_pattern}"'
 
     # find pages
     page_ids = confluence_site_search(conf, query_string, page_type, page_space)
-    logging.info(page_ids)
+    logger.info(page_ids)
 
     # update pages
     if page_ids:
         choice = input(f'Search pattern found on {len(page_ids)} pages, proceed with replacement? [NO / yes]')
         if choice == 'yes':
             update_confluence_pages(conf, page_ids, search_pattern, replace_pattern, commit_message)
+    else:
+        logger.info('Search pattern not found. Exiting.')
+        exit()
 
 if __name__ == "__main__":
     main()
