@@ -35,7 +35,7 @@ logging.basicConfig(
 logger.setLevel(log_level) # log level for conflogger
 
 
-confluence_server = input('Enter confluence server url (without protocol): ')
+confluence_server = input('Enter confluence server url (without "http(s)://"): ')
 confluence_user = input('Please enter confluence user name: ')
 confluence_password = getpass(f'Please enter Confluence password for user {confluence_user}: ')
 
