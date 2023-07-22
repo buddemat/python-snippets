@@ -14,5 +14,7 @@ python-snippets
 ├── config.yml                         # Config file to store options in.
 ├── language-detection.py              # Language detection with Python `langdetect`.
 ├── move-mouse.py                      # Mini script to regularly move mouse, e.g. to prevent sleep or lock.
+├── multiprocessing_tqdm.py            # Small multiprocessing example with progress bars.
+
 └── README.md                          # This file.
 ```
